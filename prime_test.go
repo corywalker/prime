@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestPrimes(t *testing.T) {
+/*func TestPrimes(t *testing.T) {
 	p := Primes(1000000)
 	if len(p) != 78498 {
 		t.Error("Wrong number of prime numbers lower than 1M,", len(p))
@@ -63,4 +63,14 @@ func ExamplePrimes() {
 	// Output:
 	// [2 3 5 7 11 13 17 19 23 29 31 37 41 43 47]
 
+}*/
+
+func TestFailure(t *testing.T) {
+	// To reproduce the panic, the above tests must be commented out. For some reason this sequence produces the error.
+	// issue only happens if we do 15 first and then 19!
+	// It has issues expanding the csegpool
+	p := Primes(15)
+	fmt.Println(p)
+	j := Primes(19)
+	fmt.Println(j)
 }

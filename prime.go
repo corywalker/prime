@@ -9,6 +9,7 @@
 package prime
 
 import (
+	"fmt"
 	"math"
 	"runtime"
 	"sync"
@@ -64,6 +65,7 @@ var csegPool sync.Pool
 func fillSegments(n uint64, basePrimes []uint64, allPrimes *[]uint64, segSize uint64, segNum uint64, next chan bool, nextTurn []chan bool) {
 	cseg := (csegPool.Get()).([]bool)
 	for i := uint64(0); i < segSize; i++ {
+		fmt.Printf("cseg is length %v but we're trying to access index %v\n", len(cseg), i+1)
 		cseg[i] = false
 	}
 	for i := 0; i < len(basePrimes); i++ {
@@ -95,22 +97,30 @@ func fillSegments(n uint64, basePrimes []uint64, allPrimes *[]uint64, segSize ui
 	csegPool.Put(cseg)
 }
 
-// Primes is using Segmented sieve. This method will reduce memory usae of Sieve of Eratosthenes considerably.
+// Primes is using Segmented sieve. This method will reduce memory usage of Sieve of Eratosthenes considerably.
 // besides memory allocation for Prime numbers slice, there is only O(sqrt(n)) extra memory required for the operation
 // You can learn more about it in https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes.
 func Primes(n uint64) (allPrimes []uint64) {
 	if uint64(math.Log(float64(n))-1) == 0 {
+		fmt.Println("using path 1")
 		return SieveOfEratosthenes(n)
 	}
 
 	// There is a function pi(x) in math that will returns approximate number of prime numbers below n.
+	// oh, could this be wrong??
 	allPrimes = make([]uint64, 0, n/uint64(math.Log(float64(n))-1))
 	segSize := uint64(math.Sqrt(float64(n)))
+	fmt.Printf("Segsize is %v\n", segSize)
 
 	csegPool.New = func() interface{} {
+		// just adding 10 to segSize here fixes things.
 		return make([]bool, segSize)
 	}
 
+	csegtmp := (csegPool.Get()).([]bool)
+	fmt.Printf("cseg size: %v\n", len(csegtmp))
+
+	fmt.Println("using path 2")
 	basePrimes := SieveOfEratosthenes(segSize)
 	allPrimes = append(allPrimes, basePrimes...)
 
